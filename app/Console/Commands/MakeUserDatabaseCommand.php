@@ -27,6 +27,8 @@ class MakeUserDatabaseCommand extends Command
      */
     protected $description = 'Create Database Structure for specified user';
 
+    protected $resolver;
+
     /**
      * Create a new command instance.
      *
@@ -40,23 +42,23 @@ class MakeUserDatabaseCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
      */
     public function handle()
     {
         $userId = $this->argument('user_id');
-
         $user = User::findOrFail($userId);
 
-        //database name: user_db_#id#
-
         $database_name = "user_db_{$user->id}";
-
-        $response = \DB::affectingStatement("CREATE SCHEMA IF NOT EXISTS $database_name");
-
+        \DB::affectingStatement("CREATE SCHEMA IF NOT EXISTS $database_name");
         config(['database.connections.users.database' => $database_name]);
 
+        $this->migrate();
+        $this->seed();
+    }
 
+    private function migrate()
+    {
         $migrator = app('migrator');
         $migrator->setConnection('users');
 
@@ -68,9 +70,16 @@ class MakeUserDatabaseCommand extends Command
         foreach ($migrator->getNotes() as $note) {
             $this->output->writeln($note);
         }
+    }
+
+    private function seed()
+    {
+        $this->resolver = app('db');
+        $this->resolver->setDefaultConnection("users");
 
         $seeder = new \DefaultConfigurationSeeder();
-        $seeder->run();
+        $seeder->setContainer(app())->setCommand($this);
+        $seeder->__invoke();
 
     }
 }

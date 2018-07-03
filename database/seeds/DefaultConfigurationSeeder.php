@@ -11,6 +11,6 @@ class DefaultConfigurationSeeder extends Seeder
      */
     public function run()
     {
-        //
+
     }
 }

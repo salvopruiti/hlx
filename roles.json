@@ -1,0 +1,10 @@
+{
+  "roles": {
+    "admin": [ "Amministratore", null],
+    "operator": [ "Operatore", null]
+  },
+  "permissions": {
+    "full_control": ["Controllo Totale", "Accesso Totale al Sistema.", ["admin"]],
+    "dashboard": ["Accesso al Pannello di Controllo", "Consente l'accesso al Pannello di Controllo", ["admin", "operator"]]
+  }
+}

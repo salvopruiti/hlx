@@ -17,6 +17,7 @@
         "doctrine/dbal": "^2.7",
         "filp/whoops": "^2.0",
         "fzaninotto/faker": "^1.4",
+        "kkomelin/laravel-translatable-string-exporter": "^0.4.0",
         "laravel/homestead": "^7.9",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^2.0",

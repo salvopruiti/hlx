@@ -41,12 +41,14 @@ class MakeUserDatabaseCommand extends Command
     public function handle()
     {
         $userId = $this->argument('user_id');
+
+        /** @var User $user */
         $user = User::findOrFail($userId);
 
-        $database_name = "user_db_{$user->id}";
-        \DB::affectingStatement("CREATE SCHEMA IF NOT EXISTS $database_name");
-        config(['database.connections.users.database' => $database_name]);
+        if(!$user->userDatabaseExists())
+            $user->createUserDatabase();
 
+        $user->setUserDatabase();
         $this->migrate();
         $this->seed();
     }

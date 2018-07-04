@@ -46,4 +46,48 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * @param string $connection_name
+     * @return \Illuminate\Database\Connection
+     */
+    public function setUserDatabase($connection_name = 'users')
+    {
+        $database_name = $this->getDatabaseName();
+        config(["database.connections.$connection_name.database" => $database_name]);
+        ($connection = \DB::connection($connection_name))->disconnect();
+
+        $connection->setDatabaseName($database_name);
+
+        return $connection;
+    }
+
+    public function userDatabaseExists() : bool
+    {
+        $database_name = $this->getDatabaseName();
+        return (bool)\DB::connection('users')->selectOne("SELECT * FROM information_schema.SCHEMATA where SCHEMA_NAME = ?", [$database_name]);
+    }
+
+    public function createUserDatabase()
+    {
+        $database_name = $this->getDatabaseName();
+        \DB::affectingStatement("CREATE SCHEMA IF NOT EXISTS $database_name");
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseName(): string
+    {
+        $database_name = "user_db_{$this->id}";
+        return $database_name;
+    }
+
+    public function getDatabaseVersion(): string
+    {
+        if($this->userDatabaseExists())
+            return $this->setUserDatabase()->selectOne("SELECT max(batch) as version from migrations")->version / 10;
+
+        return '---';
+    }
 }
